@@ -1,0 +1,56 @@
+* {
+    margin: 0;
+    padding: 0;
+    color: white;
+}
+
+body {
+    background-color: #001;
+    font-family: 'Sen', sans-serif;
+}
+
+.container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.score {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    font-size: 30px;
+    padding: 10px;
+}
+
+.game {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    width: 300px;
+    height: 300px;
+    gap: 10px;
+}
+
+.box {
+    background-color: #4CAF50;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    font-size: 50px;
+    cursor: pointer;
+}
+
+@media screen and (max-width:350px){
+    .box {
+        width: 75px;
+        height: 75px;
+    }
+    .game {
+        width: calc(150px + 75px);
+        height: calc(150px + 75px);
+        gap: 5px;
+        font-size: 25px;
+    }
+}
