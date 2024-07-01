@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X O | Tic-Tac-Toe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="players">
+    <div class="player">
+      <p id="p1Name"></p>
+      <span id="p1Character"></span>
+      <div id="turn"></div>
+    </div>
+    <div class="player">
+      <p id="p2Name"></p>
+      <span id="p2Character"></span>
+      <div id="turn"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2 id="turn-text"></h2>
+    <div class="score">
+      <div class="p1"><p id="p1"></p></div>
+      <div class="p2"><p id="p2"></p></div>
+    </div>
+    <div class="game">
+      <div class="box" id="box0"></div>
+      <div class="box" id="box1"></div>
+      <div class="box" id="box2"></div>
+      <div class="box" id="box3"></div>
+      <div class="box" id="box4"></div>
+      <div class="box" id="box5"></div>
+      <div class="box" id="box6"></div>
+      <div class="box" id="box7"></div>
+      <div class="box" id="box8"></div>
+    </div>
+  </div>
+
+  <div id="win">
+    <h1>Winner</h1>
+    <h3 id="winnerCharacter"></h3>
+    <p id="winnerName"></p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+  <script>
+    const socket = io();
+    const boxes = Array.from(document.getElementsByClassName("box"));
+    const p1Score = document.getElementById("p1");
+    const p2Score = document.getElementById("p2");
+    const turnText = document.getElementById("turn-text");
+
+    const winBox = document.getElementById("win");
+    const winnerName = document.getElementById("winnerName");
+    const winnerCharacter = document.getElementById("winnerCharacter");
+
+    let currentPlayer = "X";
+    let p1Points = parseInt(localStorage.getItem("p1Points")) || 0;
+    let p2Points = parseInt(localStorage.getItem("p2Points")) || 0;
+    let gameActive = true;
+
+    const saveScoresToLocalStorage = () => {
+      localStorage.setItem("p1Points", p1Points);
+      localStorage.setItem("p2Points", p2Points);
+    };
+
+    const printScores = () => {
+      p1Score.textContent = `X : ${p1Points}`;
+      p2Score.textContent = `O : ${p2Points}`;
+    };
+
+    const checkResult = () => {
+      let roundWon = false;
+      for (let i = 0; i < winningCombinations.length; i++) {
+        const [a, b, c] = winningCombinations[i];
+        const boxA = boxes[a].textContent;
+        const boxB = boxes[b].textContent;
+        const boxC = boxes[c].textContent;
+        if (boxA === "" || boxB === "" || boxC === "") {
+          continue;
+        }
+        if (boxA === boxB && boxB === boxC) {
+          roundWon = true;
+          break;
+        }
+      }
+      if (roundWon) {
+        gameActive = false;
+        boxes.forEach((box) => box.removeEventListener("click", handleBoxClick));
+        if (currentPlayer === "X") {
+          p1Points++;
+          winBox.style.display = "block";
+          winnerCharacter.innerHTML = "X"
+          winnerName.innerHTML = "p1"
+        } else {
+          p2Points++;
+          winBox.style.display = "block";
+          winnerCharacter.innerHTML = "O"
+          winnerName.innerHTML = "p2"
+        }
+        saveScoresToLocalStorage();
+        printScores();
+        setTimeout(() => {
+          resetBoard();
+          location.reload(); // Reload the game
+        }, 3000);
+      } else if (isDraw()) {
+        gameActive = false;
+        setTimeout(() => {
+          resetBoard();
+        }, 3000);
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        turnText.textContent = `${currentPlayer}'s turn`;
+      }
+    };
+
+    const resetBoard = () => {
+      currentPlayer = "X";
+      turnText.textContent = `${currentPlayer}'s turn`;
+      boxes.forEach((box) => {
+        box.textContent = "";
+        winBox.style.display = "none";
+        gameActive = true;
+        printScores();
+        boxes.forEach((box) => box.addEventListener("click", handleBoxClick));
+        turnText.textContent = `${currentPlayer}'s turn`;
+      });
+    };
+    boxes.forEach((box) => box.addEventListener("click", handleBoxClick));
+    function handleBoxClick(e){
+      const box = e.target;
+      const index = box.id;
+      if (box.textContent !== "" || !gameActive) return;
+      box.textContent = currentPlayer;
+      checkResult();
+    }
+  </script>
+</body>
+</html>

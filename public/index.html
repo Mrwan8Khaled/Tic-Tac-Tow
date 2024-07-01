@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sen&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="main.css" />
+  <title>Tic tac - rooms</title>
+</head>
+<body>
+  <main>
+    <div class="head">
+      <input type="text" placeholder="Enter your name" id="username" />
+      <button onclick="createRoom()">Create room</button>
+    </div>
+    <div class="rooms">
+      <ul id="roomList"></ul>
+    </div>
+  </main>
+
+  <div id="shadow" style="display: none;">
+    <div id="roomCreating">
+      <input id="roomName" type="text" placeholder="Room name" />
+      <button onclick="createRoom()">Create room</button>
+    </div>
+  </div>
+
+  <script>
+    var socket = io();
+
+    const usernameInput = document.getElementById('username');
+    const roomList = document.getElementById('roomList');
+
+    localStorage.removeItem("roomName")
+    localStorage.removeItem("username")
+
+    // Function to create a room
+    function createRoom() {
+      const roomName = prompt('Enter room name:');
+      const username = usernameInput.value;
+      if (roomName && username) {
+        socket.emit('createRoom', roomName, username);
+        localStorage.setItem("roomName", roomName)
+        localStorage.setItem("username", username)
+        window.open("waiting.html")
+      }
+    }
+
+    // Function to join a room
+    function joinRoom(roomName) {
+      const username = usernameInput.value;
+      if (username) {
+        socket.emit('joinRoom', { roomName, username });
+        localStorage.setItem("roomName", roomName)
+        localStorage.setItem("username", username)
+        window.open("waiting.html")
+      } else {
+        alert('Please enter your name first.');
+      }
+    }
+
+    // Listen for room list updates
+    socket.on('roomListUpdate', (rooms) => {
+      roomList.innerHTML = '';
+      console.log(rooms);
+      rooms.forEach(room => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <h3>${room.name}</h3>
+          <button onclick="joinRoom('${room.name}')">Join</button>
+        `;
+        roomList.appendChild(li);
+      });
+    });
+
+    // Initial load of rooms
+    window.onload = () => {
+      socket.emit('ShowRooms');
+    };
+  </script>
+</body>
+</html>

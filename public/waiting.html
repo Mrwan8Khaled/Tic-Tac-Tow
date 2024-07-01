@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sen&display=swap" rel="stylesheet" />
+  <title>Waiting Room</title>
+</head>
+<body>
+  <div class="waiting-room">
+    <h2>Waiting for players...</h2>
+    <p id="players"></p>
+    <button id="startBtn" style="display: none;" onclick="startGame()">Start Game</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var roomName = localStorage.getItem('roomName');
+    var username = localStorage.getItem('username');
+
+    socket.emit('joinRoom', { roomName, username });
+
+    // Listen for room readiness
+    socket.on('roomReady', (roomName, players) => {
+      document.getElementById('players').innerText = `Players: ${players.map(p => p.name).join(', ')}`;
+      if (players.length === 2) {
+        document.getElementById('startBtn').style.display = 'block';
+      }
+    });
+
+    // Function to start the game
+    function startGame() {
+      socket.emit('startGame', roomName);
+    }
+
+    // Redirect to game page when the game starts
+    socket.on('gameStart', (roomName) => {
+      document.write("HI")
+    });
+  </script>
+</body>
+</html>
